@@ -4,11 +4,7 @@ var app = express();
 var server = app.listen(2000, function () {
   console.log("Listening on port 2000");
 });
-const fs = require("fs");
-const fileUpload = require("express-fileupload");
-const io = require("socket.io")(server, {
-  allowEIO3: true, // false by default
-});
+
 app.use(express.static(path.join(__dirname, "")));
 var userConnections = [];
 io.on("connection", (socket) => {
@@ -18,11 +14,7 @@ io.on("connection", (socket) => {
     var other_users = userConnections.filter(
       (p) => p.meeting_id == data.meetingid
     );
-    userConnections.push({
-      connectionId: socket.id,
-      user_id: data.displayName,
-      meeting_id: data.meetingid,
-    });
+   
     var userCount = userConnections.length;
     console.log(userCount);
     other_users.forEach((v) => {
@@ -55,23 +47,7 @@ io.on("connection", (socket) => {
       });
     }
   });
-  socket.on("fileTransferToOther", (msg) => {
-    console.log(msg);
-    var mUser = userConnections.find((p) => p.connectionId == socket.id);
-    if (mUser) {
-      var meetingid = mUser.meeting_id;
-      var from = mUser.user_id;
-      var list = userConnections.filter((p) => p.meeting_id == meetingid);
-      list.forEach((v) => {
-        socket.to(v.connectionId).emit("showFileMessage", {
-          username: msg.username,
-          meetingid: msg.meetingid,
-          filePath: msg.filePath,
-          fileName: msg.fileName,
-        });
-      });
-    }
-  });
+ 
 
   socket.on("disconnect", function () {
     console.log("Disconnected");
